@@ -253,6 +253,8 @@ async function killCycle() {
 }
 
 function startBot() {
+	if (bot) cleanUpBot(bot); // ensure any old bot is cleaned up before creating a new one
+
     return new Promise((resolve, reject) => {
         const tempBot = mineflayer.createBot({
             host: 'play.civmc.net',
@@ -288,6 +290,19 @@ function startBot() {
     });
 }
 
+function cleanUpBot(botInstance) {
+	if (!botInstance) return;
+	try {
+		botInstance.removeAllListeners();
+		if (botInstance._client) botInstance._client.removeAllListeners();
+		if (botInstance.quit) botInstance.quit();
+	} catch (e) {
+		console.error('Cleanup error:', e);
+	}
+}
+
+
+
 
 async function main() {
 	console.log('Bot Initializing');
@@ -307,6 +322,8 @@ async function main() {
 	  }
   
 	  console.log('Bot disconnected. Restarting...');
+	  cleanUpBot(bot);
+	  bot = null;
 	}
   }
   
